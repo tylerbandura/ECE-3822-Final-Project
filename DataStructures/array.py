@@ -84,11 +84,21 @@ class array:
 
     # get method
     def get(self, index):
+        # index bounds check
+        if index < 0 or index >= self._size:
+            raise IndexError("Index out of bounds")
         # get the element at the specified index
         return self._array[index]
     
     # set method
     def set(self, index, value):
+        # index bounds check
+        if index < 0:
+            raise IndexError("Index cannot be negative")
+        # expand the array if index exceeds current size
+        while index >= self._size:
+            self.append(None)
+            self._size += 1
         # set the element at the specified index
         self._array[index] = value
 
@@ -147,6 +157,9 @@ class BucketArray:
 
     # get_bucket method
     def get_bucket(self, index):
+        # index bounds check
+        if index < 0 or index >= self._size:
+            raise IndexError("Index out of bounds")
         # get the value at the specified index in the bucket array
         return self._bucket.get(index)
     
