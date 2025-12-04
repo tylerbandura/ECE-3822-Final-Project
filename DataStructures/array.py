@@ -1,6 +1,54 @@
-# file: DataStructures/array.py
-# A simple implementation of a dynamic array data structure.
-# ZhaoXiang Lan, 12/4/2025
+'''
+file: DataStructures/array.py
+A simple implementation of a dynamic array data structure.
+ZhaoXiang Lan, 12/4/2025
+
+description:
+This program defines a dynamic array class and a BucketArray class
+----------------------------------------------------------------------
+dynamic arrat(similar to Python list)
+functions:
+1. append(value): Append an element to the end of the array.
+2. get(index): Get the element at the specified index.
+3. set(index, value): Set the element at the specified index.
+4. size(): Return the current size of the array.
+5. display(): Return a string representation of the array.
+
+example usage:
+from array import array
+arr = array()
+arr.append(10)
+arr.append(20)
+print(arr.display())  # Output: [10, 20]  
+value = arr.get(1)
+print(value)         # Output: 20
+arr.set(0, 15)
+print(arr.display())  # Output: [15, 20]
+----------------------------------------------------------------------
+BucketArray (array of arrays)
+functions:
+1. set_bucket(index, value): Set the array at the specified bucket index.
+2. get_bucket(index): Get the array at the specified bucket index.
+3. add_to_bucket(bucket_index, value): Add an element to the array at the specified bucket index.
+4. size(): Return the current size of the bucket array.
+5. display(): Return a string representation of the bucket array.
+
+example usage:
+from array import BucketArray
+bucket_arr = BucketArray()
+add emelent to bucket 0
+bucket_arr.add_to_bucket(0, 10)
+bucket_arr.add_to_bucket(0, 20)
+set bucket 1 directly
+arr = array()
+arr.append(30)
+bucket_arr.set_bucket(1, arr)
+print(bucket_arr.display())
+Output:
+0: [10, 20]
+1: [30]
+----------------------------------------------------------------------
+'''
 
 # dynamic array class
 # 
