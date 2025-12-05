@@ -105,3 +105,4 @@ class Queue_circular:
         # return the number of valid elements in the queue
         # return the number of total element
         return self.n_elements
+    
