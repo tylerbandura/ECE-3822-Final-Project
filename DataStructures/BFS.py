@@ -11,8 +11,8 @@ author: Tony Mejia
 '''
 
 # import code from toher files
-from DataStructures.Queue import Queue_circular
-from DataStructures.Graph import Graph
+from DataStructures.queue import Queue_circular
+from DataStructures.graph import Graph
 
 # BFS class that specializes in fisnding the shortest path so i can use it in query 6
 class BFS:
