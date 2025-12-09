@@ -132,7 +132,7 @@ class BST:
     '''
     def delete(self, value=None, node=None):
         if node is None:
-            return None
+            raise ValueError("Node not in tree.")
         # Begin at root
         node = self.root
         # Traverse left tree
