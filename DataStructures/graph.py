@@ -60,6 +60,14 @@ class Graph:
     def has_node(self, node):
         return node in self.adj
     
+    # fuction to get edge data
+    def get_edge_data(self, node1, node2):
+        if (node1, node2) in self.edge_label:
+            return self.edge_label[(node1, node2)]
+        elif (node2, node1) in self.edge_label:
+            return self.edge_label[(node2, node1)]
+        return None
+    
 # end of Graph class
 
 # end of file
