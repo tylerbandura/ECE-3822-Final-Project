@@ -51,22 +51,22 @@ class BFS:
                     queue.push(neighbor)
             # end of heart of BFS
 
-            # if we reached the end node, break
-            if end not in visited:
-                return None
+        # if we reached the end node, break
+        if end not in visited:
+            return None
             
-            # restart from end to start to get the path
-            path = [] # list to store the path
-            node = end # start from the end node
+        # restart from end to start to get the path
+        path = [] # list to store the path
+        node = end # start from the end node
 
-            # while node is not None, add it to the path
-            # this is because we want to go back to the start node so 
-            # we use the visisted dictionary to get the parent of each node
-            while node is not None:
-                path.append(node)
-                node = visited[node]
-            path.reverse()
-            return path
+        # while node is not None, add it to the path
+        # this is because we want to go back to the start node so 
+        # we use the visisted dictionary to get the parent of each node
+        while node is not None:
+            path.append(node)
+            node = visited[node]
+        path.reverse()
+        return path
         
 # end of BFS clas
 
