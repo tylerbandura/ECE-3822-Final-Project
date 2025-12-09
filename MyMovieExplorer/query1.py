@@ -74,7 +74,7 @@ class Find_Movie_By_Title:
             movie_data = movies_array.get(movie)
 
             # get the title
-            title = movie_data['title']
+            title = movie_data['title'].strip().lower() # added this to fix case sensitivity
 
             # insert into the hashtable using title as key
             movie_title_table.insert(title, movie_data)
@@ -88,7 +88,7 @@ class Find_Movie_By_Title:
     # function to lookup a movie by title
     def find_movie_by_title(self, movie_title_table, title):
         # lookup the movie in the hashtable
-        movie = movie_title_table.lookup(title)
+        movie = movie_title_table.lookup(title.strip().lower()) # added to fix case sensitivity
 
         # return the movie data
         return movie
