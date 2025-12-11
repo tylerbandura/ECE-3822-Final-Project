@@ -128,7 +128,7 @@ def load_movie_database():
         return None
 
 # main fuction to call everything and interact with user to get movie suggestions
-def main():
+def movei_suggestion():
     # load movie database
     db = load_movie_database()
     
@@ -148,6 +148,6 @@ def main():
         
 
 if __name__ == "__main__":
-    main()
+    movei_suggestion()
 
 # end of file
