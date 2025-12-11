@@ -35,8 +35,9 @@ from DataStructures.array import array
 class MinHeap:
     # constructor
     def __init__(self):
-        # initialize a min-heap using the Heap class
-        self.heap = Heap(lambda a, b: a < b)
+        # initialize a min-heap using the Heap class with tuple comparison
+        # compare only the first element of tuples (the numeric value)
+        self.heap = Heap(lambda a, b: a[0] < b[0] if isinstance(a, tuple) and isinstance(b, tuple) else a < b)
 
     # insert an new element
     def push (self, value):
@@ -62,8 +63,9 @@ class MinHeap:
     def get_all_elements(self):
         # pop all elements and return them in an array
         elements = array()
-        size = self.size()
-        for i in range(size):
-            elements.append(self.pop())
+        while not self.is_empty():
+            element = self.pop()
+            if element is not None:  # filter out None values
+                elements.append(element)
         # return the array of elements
         return elements

@@ -1,3 +1,10 @@
+'''
+file: tests/test1.py
+ZhaoXiang Lan, 12/8/2025
+
+description:
+the test file for query1.py
+'''
 # add the project root to sys.path
 import os
 import sys

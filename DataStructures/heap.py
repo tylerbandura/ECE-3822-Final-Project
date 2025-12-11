@@ -72,6 +72,9 @@ class Heap:
             self.data.set(0, last_element)
             # heapify down from the root
             self.heapify_down(0)
+        
+        # return the root element
+        return root
 
     # heapify up method
     def heapify_up(self, index):
