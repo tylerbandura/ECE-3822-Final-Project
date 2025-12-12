@@ -15,7 +15,6 @@ if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
 
 # inport necessary modules
-from matplotlib.pyplot import title
 import pandas as pd
 import ast
 from DataStructures.array import array, BucketArray
