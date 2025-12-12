@@ -13,6 +13,7 @@ author: tony mejia-cuba
 import os
 import sys
 import pickle
+import ast
 
 # Add project root to sys.path so Python can find DataStructures
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,11 +24,11 @@ from DataStructures.hashTable import HashTable
 # movie class to hold movie data and use in hash table
 class Movie:
     # constructor
-    def __init__(self, movie_id,title,genre,rating):
+    def __init__(self, movie_id,title,genre_list,rating):
         self.movie_id = movie_id
         self.title = title
-        self.genre = genre
-        self.rating = rating
+        self.genre_list = genre_list
+        self.rating = float(rating) if rating else 0.0
 
 # movie database class to hold movies and will do the suggesting
 class MovieDatabase:
@@ -35,20 +36,21 @@ class MovieDatabase:
     def __init__(self):
         # store movies by title for quick lookup, call HashTable
         self.movies_by_title = HashTable(size=100000)
-        # store movies by genre for suggesting
-        self.movies_by_genre = HashTable(size=100)
+        # st ore movies by genre for suggesting
+        self.movies_by_genre = HashTable(size=200)
 
     # method to add movie to database
     def add_movie(self, movie):
         self.movies_by_title.insert(movie.title, movie)
 
-        genre_list = self.movies_by_genre.lookup(movie.genre) # get list of movies in genre
-        # if genre not in hash table, create new list
-        if genre_list is None:
-            genre_list = []
-            self.movies_by_genre.insert(movie.genre, genre_list) # insert new list into hash table
+        for genre in movie.genre_list:
+            genre_list = self.movies_by_genre.lookup(genre) # get list of movies in genre
+            # if genre not in hash table, create new list
+            if genre_list is None:
+                genre_list = []
+                self.movies_by_genre.insert(genre, genre_list) # insert new list into hash table
     
-        genre_list.append(movie) # add movie to genre list
+            genre_list.append(movie) # add movie to genre list
 
     # method to suggest movies based on title
     def suggest_movies(self, movie_title, top_k=5):
@@ -60,13 +62,22 @@ class MovieDatabase:
             return []
         
         # get movies in same genre
-        candidates = self.movies_by_genre.lookup(movie.genre)
-        # error handling if no movies in genre
-        if candidates is None:
-            print(f"No movies found in genre '{movie.genre}'.")
-            return []
+        candidates = []
+
+        # for each genre in movie, get list of movies in that genre and add to candidates list
+        for genre in movie.genre_list:
+            genre_bucket = self.movies_by_genre.lookup(genre)
+            if genre_bucket is not None:
+                for m in genre_bucket:
+                    if m not in candidates:
+                        candidates.append(m)
         
         # heart of it, computing suggesting base on score
+        candidates = [m for m in candidates if m.title != movie_title]
+        
+        if not candidates:
+            return []
+        
         scored_candidates = []
         '''
         what this for loop will do:
@@ -84,17 +95,11 @@ class MovieDatabase:
         5 points for genre match ensures that only movies of the same genre are considered
         '''
         for m in candidates:
-            if m.title == movie_title:
-                continue
-            score = 0
+            score = 5
+            diff = abs(movie.rating - m.rating)
 
-            # genre match
-            score += 5
-
-            # rating difference, the closer the better
-            rating_diff = abs(movie.rating - m.rating)
-            if rating_diff <= 1.0:
-                score += (1 - rating_diff) * 5  # max 5 points for rating match
+            if diff <= 1.0:
+                score += (1 - diff) * 5  # max 5 points for rating match
             scored_candidates.append((score, m))
 
             # simple bubble sort to sort scored candidates by score descending, mergesort.py was not finished
@@ -103,9 +108,7 @@ class MovieDatabase:
                 if scored_candidates[j][0] > scored_candidates[i][0]:
                     scored_candidates[i], scored_candidates[j] = scored_candidates[j], scored_candidates[i]
 
-        # get top k suggestions
-        top_movies = [m.title for score, m in scored_candidates[:top_k]]
-        return top_movies
+        return [m.title for score, m in scored_candidates[:top_k]]
 
 # function to load pickled movie database
 def load_movie_database():
@@ -131,12 +134,16 @@ def load_movie_database():
 def movie_suggestion():
     # load movie database
     db = load_movie_database()
+    if db is None:
+        print("Failed to load movie database.")
+        return
     
     print("What movie would you like suggestions for?")
     movie_title = input("Enter movie title: ").strip()
 
     # get suggestions
-    suggestions = db.suggest_movies(movie_title, top_k=5)
+    suggestions = db.suggest_movies(movie_title)
+
     # if suggestions found, print them
     if suggestions:
         print(f"Top suggestions for '{movie_title}':")
