@@ -24,7 +24,7 @@ def format_actor_name(name):
     return "".join(part.capitalize() for part in name.split())
 
 # main fuction
-def main():
+def path_for_2_actors():
     if len(sys.argv) == 3:
         actor1 = sys.argv[1].strip()
         actor2 = sys.argv[2].strip()
@@ -82,6 +82,6 @@ def main():
             print("  └── through ", movie)
 
 if __name__ == "__main__":
-    main()
+    path_for_2_actors()
 
 # end of file

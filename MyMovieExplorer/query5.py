@@ -101,7 +101,6 @@ class MovieDatabase:
             if diff <= 1.0:
                 score += (1 - diff) * 5  # max 5 points for rating match
             scored_candidates.append((score, m))
-            diff = abs(movie.rating - m.rating)
 
             # simple bubble sort to sort scored candidates by score descending, mergesort.py was not finished
         for i in range(len(scored_candidates)):
@@ -132,7 +131,7 @@ def load_movie_database():
         return None
 
 # main fuction to call everything and interact with user to get movie suggestions
-def main():
+def movie_suggestion():
     # load movie database
     db = load_movie_database()
     if db is None:
@@ -156,6 +155,6 @@ def main():
         
 
 if __name__ == "__main__":
-    main()
+    movie_suggestion()
 
 # end of file

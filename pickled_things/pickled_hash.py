@@ -9,6 +9,7 @@ import os
 import sys
 import pickle
 import pandas as pd
+import ast # to parse the genre list
 
 # Add the parent directory to Python's path so we can import MyMovieExplorer
 parent_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -66,7 +67,7 @@ def main():
     # repeat the same logic as above for the ratings csv
     try:
         ratings_df = pd.read_csv(RATINGS_CSV, dtype=str)
-        ratings_df['movieId'] = pd.to_numeric(ratings_df['movieId'], errors='coerce')
+        ratings_df['movieId'] = pd.to_numeric(ratings_df['movieId'], errors='ignore')
         ratings_df['rating'] = pd.to_numeric(ratings_df['rating'], errors='coerce')
         ratings_df = ratings_df.dropna(subset=['movieId'])
         ratings_df['movieId'] = ratings_df['movieId'].astype(int)
@@ -87,10 +88,14 @@ def main():
 
     # build movie objects
     for _, row in merged.iterrows():
+
+        # parse the genre list
+        genre_list = parse_genres(row['genres'])
+
         movie = Movie(
             movie_id=row['id'],
             title=row['title'],
-            genre=row['genres'],
+            genre_list=genre_list,
             rating=float(row['rating']        )
         )
         db.add_movie(movie)
