@@ -8,7 +8,6 @@ keep the top 10 movies with rantings or revenue
 # input the root path
 import os
 import sys
-from unittest import result
 
 # add the project root to sys.path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -49,7 +48,7 @@ class Top10_Movies:
                     # convert the parsed list to a dynamic array
                     genre_array = array()
                     # append each genre dictionary to the dynamic array
-                    for g in parsed:                    # convert list → array()
+                    for g in parsed:
                         genre_array.append(g)
                     movie["genres"] = genre_array
                 except:
@@ -67,7 +66,7 @@ class Top10_Movies:
     
     # function to get top 10 movies ratings or revenue value 
     def get_top10_movies(self, movie, key):
-        
+        # get the value by key
         value = movie.get(key, 0)
 
         # handle missing or invalid values
@@ -79,12 +78,15 @@ class Top10_Movies:
             return 0
 
         try:
+            # convert value to float
             return float(value)
         except:
             return 0
     
     def top10_update(self, heap, movie_index, key, k):
+        # get the movie and its value
         movie = self.movies_array.get(movie_index)
+        # get the value by key
         new_val = self.get_top10_movies(movie, key)
 
         # if heap is not full yet, just push
@@ -146,17 +148,25 @@ class Top10_Movies:
         while index < top_10_movie.size():
             movie = top_10_movie.get(index)
 
+            # Title
             title = movie.get("title")
             if not title:
-                title = movie.get("original_title", "Unknown Title")
-
+                title = movie.get("original_title")
+            if not title:
+                title = "Unknown Title"
+            # Key value
             value = self.get_top10_movies(movie, key)
-            release_date = movie.get("release_date", "Unknown")
+            # Release date
+            if "release_date" in movie:
+                release_date = movie["release_date"]
+            else:
+                release_date = "Unknown"
 
+            # print the movie info
             print(f"\n#{rank}: {title}")
             print(f"{key}: {value}")
             print(f"Release date: {release_date}")
-
+            # increment counters
             rank += 1
             index += 1
 

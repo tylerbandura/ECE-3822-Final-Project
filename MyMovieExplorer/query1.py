@@ -9,7 +9,7 @@ the program to find a movie by title
 import os
 import sys
 
-# add the project root to sys.path
+# add the project root to sys.path for running the module
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if PROJECT_ROOT not in sys.path:
     sys.path.append(PROJECT_ROOT)
@@ -20,7 +20,10 @@ import ast
 from DataStructures.array import array, BucketArray
 from DataStructures.hashTable import HashTable
 
+# define the class to find movie by title
+#
 class Find_Movie_By_Title:
+    # constructor
     def __init__(self):
         self.movie_title_table = None
         self.movies_array = None
@@ -48,22 +51,24 @@ class Find_Movie_By_Title:
                     # convert the parsed list to a dynamic array
                     genre_array = array()
                     # append each genre dictionary to the dynamic array
-                    for g in parsed:                    # convert list → array()
+                    for g in parsed:
+                        # append genre dictionary to dynamic array
                         genre_array.append(g)
+                    # assign the dynamic array to the movie's genres field
                     movie["genres"] = genre_array
                 except:
                     movie["genres"] = array()
             else:
                 movie["genres"] = array() 
-
+            # append the movie to the dynamic array
             array_of_movies.append(movie)
         
-        # store the movies array
+        # set the movies_array attribute
         self.movies_array = array_of_movies
 
-        # return the dynamic array of movies 
+        # return the movies array
         return array_of_movies
-
+    
     # build the hashtable indexed by movie titles
     def build_title_hashtable(self, movies_array):
 
@@ -162,25 +167,21 @@ class Find_Movie_By_Title:
 
         # First: make sure genres_array is your custom array type
         if genres_array:
-            has_size = hasattr(genres_array, "size")
-            has_get = hasattr(genres_array, "get")
+            # Loop through the array using a simple counter
+            index = 0
+            total_items = genres_array.size()
 
-            if has_size and has_get:
-                # Loop through the array using a simple counter
-                index = 0
-                total_items = genres_array.size()
+            while index < total_items:
+            # Get the element at current index
+                item = genres_array.get(index)
 
-                while index < total_items:
-                # Get the element at current index
-                    item = genres_array.get(index)
+                # Each element should be a dictionary like {"id": x, "name": y}
+                if isinstance(item, dict):
+                    if "name" in item:
+                        genre_names.append(item["name"])
 
-                    # Each element should be a dictionary like {"id": x, "name": y}
-                    if isinstance(item, dict):
-                        if "name" in item:
-                            genre_names.append(item["name"])
-
-                    # Move to next index
-                    index += 1
+                # Move to next index
+                index += 1
                     
         # genre_names contains all the genre names
         # print them as a comma-separated string
