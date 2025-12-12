@@ -9,6 +9,34 @@ import sys
 from MyMovieExplorer.query1 import Find_Movie_By_Title
 from MyMovieExplorer.query2 import FindByActor
 from MyMovieExplorer.query4 import Top10_Movies
+from MyMovieExplorer.query5 import MovieDatabase, load_movie_database
+from MyMovieExplorer.query6 import path_for_2_actors
+from MyMovieExplorer.fav_list import UserProfile
+
+user_profile = UserProfile()
+
+# this is the function for the fav/watch later list, it will be called with each query
+def handle_add_to_list(user_profile, movie_title):
+    """
+    Helper for adding a movie to favorites or watch-later list.
+    """
+    list_choice = input("Add to (fav/watch)? ").strip().lower()
+
+    if list_choice == "fav":
+        if user_profile.add_favorite(movie_title):
+            print(f"Added '{movie_title}' to Favorites.\n")
+        else:
+            print("That movie is already in Favorites.\n")
+
+    elif list_choice == "watch":
+        if user_profile.add_watch_later(movie_title):
+            print(f"Added '{movie_title}' to Watch-Later list.\n")
+        else:
+            print("That movie is already in Watch-Later.\n")
+
+    else:
+        print("Invalid choice. Please type 'fav' or 'watch'.\n")
+
 
 def main():
     print("Initializing Movie Data Explorer... Please wait.\n")
@@ -33,6 +61,7 @@ def main():
     # each query loads its own data internally
     q1 = Find_Movie_By_Title()
     q2 = FindByActor(actorTable, id_to_movieData, id_to_rating)
+    q5 = load_movie_database()
 
     movie_file = "data/prototype_data/movies_metadata_small.csv"
     movies_array = q1.load_movies_from_csv(movie_file)
@@ -47,9 +76,11 @@ def main():
         print("3. Finds all movies between two years by given genre")
         print("4. Top 10 movies (ratings or revenue)")
         print("5. Get suggested Movie")
-        print("7. Quit Explorer")
+        print("6. Find the shortest path between two actors")
+        print("7. Manage favorites / Watch-Later Lists")
+        print("8. Quit Explorer")
 
-        choice = input("\nEnter your choice (1-7): ").strip()
+        choice = input("\nEnter your choice (1-8): ").strip()
 
         # Query 1 Placeholder
         if choice == "1":
@@ -82,6 +113,12 @@ def main():
                     print(f"\nMovies featuring {actor} (sorted by rating):")
                     for movie in result_array:
                         q2.display_movie_info(movie)
+
+                add_choice = input("\nWould you like to add one of these movies to your favorites or watch-later list? (yes/no): ").strip().lower()
+                if add_choice == "yes":
+                    movie_title = input("Enter the exact movie title: ").strip()
+                    handle_add_to_list(user_profile, movie_title)
+
                 else:
                     print(f"\nNo movies found for {actor}.")
 
@@ -134,51 +171,120 @@ def main():
                     print("\nInvalid input. Returning to main menu.\n")
                     break
 
-        # Query 5 Placeholder
+        # Query 5
         elif choice == "5":
             while True:
-                print("\n--- Query 5: Find Movies by Director ---")
-                print("NOT DONE YET!\n")
-                _ = input("Enter director name: ").strip()
-                print("\n[Placeholder] Director search results would appear here.\n")
+                print("\nQuery 5: Suggested movies")
+                # Make sure the movie database is loaded
+                if q5 is None:
+                    print("Movie suggestion database not loaded. Please check your pickle file.")
+                    break
 
-                again = input("\nAre you finished with your search? (yes/no): ").strip().lower()
+                movie_title = input("Enter a movie title you like: ").strip()
+
+                # Get suggestions
+                suggestions = q5.suggest_movies(movie_title)
+
+                # Display results
+                if suggestions:
+                    print(f"\nTop suggestions for '{movie_title}':")
+                    for i, title in enumerate(suggestions, start=1):
+                        print(f"{i}. {title}")
+
+                    # Let user add a suggestion to favorites or watch-later
+                    add_choice = input(
+                        "\nWould you like to add one of these movies to your favorites or watch-later list? (yes/no): "
+                    ).strip().lower()
+
+                    if add_choice == "yes":
+                        movie_to_add = input("Enter the exact movie title: ").strip()
+                        handle_add_to_list(user_profile, movie_to_add)
+                else:
+                    print(f"\nNo suggestions found for '{movie_title}'.")
+
+                # Loop control
+                again = input("\nWould you like to get more suggestions? (yes/no): ").strip().lower()
                 if again == "no":
                     print("\nReturning to main menu...\n")
                     break
                 elif again == "yes":
-                    print("\nExiting program. Goodbye!\n")
-                    return
+                    continue
                 else:
                     print("\nInvalid input. Returning to main menu.\n")
                     break
 
-        # Query 6 Placeholder
+        # Query 6
         elif choice == "6":
             while True:
-                print("\n--- Query 6: Find Top Grossing Movies ---")
-                print("NOT DONE YET!\n")
-                _ = input("Enter number of top movies to display (example: 10): ").strip()
-                print("\n[Placeholder] Top grossing movies would appear here.\n")
+                print("\nQuery 6: Find Shortest Path Between Two Actors")
 
-                again = input("\nAre you finished with your search? (yes/no): ").strip().lower()
+                print("Enter two actor names to find their shortest connection (shared movie path):")
+                actor1 = input("Actor 1: ").strip()
+                actor2 = input("Actor 2: ").strip()
+
+                # Run the query6 function directly
+                try:
+                    # emulate its main logic cleanly
+                    import io, sys
+                    old_stdout = sys.stdout
+                    sys.stdout = buffer = io.StringIO()
+
+                    # call the function
+                    path_for_2_actors()
+
+                    sys.stdout = old_stdout
+                    output = buffer.getvalue()
+                    print(output)
+                except SystemExit:
+                    sys.stdout = old_stdout
+                except Exception as e:
+                    print(f"Error running Query 6: {e}")
+
+                # Optional: allow user to add one of the movies in the path to their lists
+                add_choice = input("\nWould you like to add one of these connecting movies to your favorites or watch-later list? (yes/no): ").strip().lower()
+                if add_choice == "yes":
+                    movie_title = input("Enter the exact movie title: ").strip()
+                    handle_add_to_list(user_profile, movie_title)
+
+                # ask to continue
+                again = input("\nWould you like to find another path? (yes/no): ").strip().lower()
                 if again == "no":
                     print("\nReturning to main menu...\n")
                     break
                 elif again == "yes":
-                    print("\nExiting program. Goodbye!\n")
-                    return
+                    continue
                 else:
                     print("\nInvalid input. Returning to main menu.\n")
                     break
 
-        # Quit
+
         elif choice == "7":
+            print("\nManage Favorites & Watch-Later Lists")
+            print("Available commands:")
+            print("  add fav <title>")
+            print("  add watch <title>")
+            print("  remove fav <title>")
+            print("  remove watch <title>")
+            print("  show favs")
+            print("  show watchlist")
+            print("  clear favs")
+            print("  clear watchlist")
+            print("  quit  (to exit back to main menu)\n")
+
+            running = True
+            while running:
+                command = input("Enter command: ").strip().lower()
+                running = user_profile.handle_command(command)
+
+            print("\nReturning to main menu...\n")
+                  
+        # Quit
+        elif choice == "8":
             print("\nGoodbye!\n")
             break
 
         else:
-            print("\nInvalid choice. Please enter 1–7.\n")
+            print("\nInvalid choice. Please enter 1–8.\n")
 
 
 # Run CLI
