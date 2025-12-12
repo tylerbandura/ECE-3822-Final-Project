@@ -67,10 +67,12 @@ class Top10_Movies:
                 # if rating path is provided, update the movie rating
                 if rating_file_path is not None:
                     # get the movie ID
-                    movie_id = movie.get('id')
+                    movie_id = str(current.key)
                     # update the rating if available
                     if movie_id in avg_ratings:
                         movie['rating'] = avg_ratings[movie_id]
+                    elif movie_id.isdigit() and int(movie_id) in avg_ratings:
+                        movie['rating'] = avg_ratings[int(movie_id)]
                     else:
                         movie['rating'] = None
 

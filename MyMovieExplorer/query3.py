@@ -1,14 +1,13 @@
 import os
 import sys
 from DataStructures.bst import BST
-import pandas as pd
+import pickle
 import ast
 
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(PROJECT_ROOT)
 
 from DataStructures.array import array
-
 
 class Movie:
     def __init__(self, title, genre, year):
@@ -20,44 +19,78 @@ class FindMoviesByGenre:
     def __init__ (self):
         self.root = None
 
-    # function to load movies from csv file
-    def load_movies_from_csv(self, file_path):
-        # read movie data from csv file using pandas
-        df = pd.read_csv(file_path)
+    def load_movies_from_pickle(self, pickle_file_path):
+        """Load movie data from the pickled id_to_movieData.pkl file."""
+        with open(pickle_file_path, "rb") as f:
+            id_to_movieData = pickle.load(f)
 
-        # convert dataframe to list of dictionaries
-        movies = df.to_dict(orient='records')
-
-        # create a dynamic array to hold the movies
+        # Create dynamic array
         array_of_movies = array()
 
-        # append each movie to the dynamic array
-        for movie in movies:
-            # parse the genres field from string to list of dictionaries
-            genres_str = movie.get('genres')
-            # check if genres_str is a valid string before parsing
-            if isinstance(genres_str, str) and genres_str.strip():
-                try:
-                    # use ast.literal_eval to safely parse the string representation of a list
-                    parsed = ast.literal_eval(genres_str)
-                    # convert the parsed list to a dynamic array
-                    genre_array = array()
-                    # append each genre dictionary to the dynamic array
-                    for g in parsed:                    # convert list → array()
-                        genre_array.append(g)
-                    movie["genres"] = genre_array
-                except:
-                    movie["genres"] = array()
-            else:
-                movie["genres"] = array() 
+        for bucket in id_to_movieData.buckets:
+            current = bucket.head
+            while current:
+                movie = current.value
 
-            array_of_movies.append(movie)
+                # Parse genres string → array of dicts
+                genres_str = movie.get("genres")
+                if isinstance(genres_str, str) and genres_str.strip():
+                    try:
+                        parsed = ast.literal_eval(genres_str)
+                        genre_array = array()
+                        for g in parsed:
+                            genre_array.append(g)
+                        movie["genres"] = genre_array
+                    except Exception:
+                        movie["genres"] = array()
+                elif not hasattr(genres_str, "size"):
+                    movie["genres"] = array()
+
+                array_of_movies.append(movie)
+                current = current.next
+
+        self.movies_array = array_of_movies
+        print(f"Loaded {array_of_movies.size()} movies from pickle.")
+        return array_of_movies
+
+    # function to load movies from csv file
+ #   def load_movies_from_csv(self, file_path):
+        # read movie data from csv file using pandas
+ #       df = pd.read_csv(file_path)
+
+        # convert dataframe to list of dictionaries
+ #       movies = df.to_dict(orient='records')
+
+        # create a dynamic array to hold the movies
+ #       array_of_movies = array()
+
+        # append each movie to the dynamic array
+ #       for movie in movies:
+            # parse the genres field from string to list of dictionaries
+ #           genres_str = movie.get('genres')
+            # check if genres_str is a valid string before parsing
+ #           if isinstance(genres_str, str) and genres_str.strip():
+ #               try:
+                    # use ast.literal_eval to safely parse the string representation of a list
+ #                   parsed = ast.literal_eval(genres_str)
+                    # convert the parsed list to a dynamic array
+ #                   genre_array = array()
+                    # append each genre dictionary to the dynamic array
+ #                   for g in parsed:                    # convert list → array()
+ #                       genre_array.append(g)
+ #                   movie["genres"] = genre_array
+ #               except:
+ #                   movie["genres"] = array()
+ #           else:
+ #               movie["genres"] = array() 
+
+ #           array_of_movies.append(movie)
         
         # store the movies array
-        self.movies_array = array_of_movies
+ #       self.movies_array = array_of_movies
 
         # return the dynamic array of movies 
-        return array_of_movies
+ #       return array_of_movies
 
     def build_year_bst(self, movies_array):
         # Create a new BST that will store movies by their release year

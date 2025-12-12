@@ -8,6 +8,7 @@ This is the code that will be used for the user interface
 import sys
 from MyMovieExplorer.query1 import Find_Movie_By_Title
 from MyMovieExplorer.query2 import FindByActor
+from MyMovieExplorer.query3 import FindMoviesByGenre
 from MyMovieExplorer.query4 import Top10_Movies
 from MyMovieExplorer.query5 import MovieDatabase, load_movie_database
 from MyMovieExplorer.query6 import path_for_2_actors
@@ -60,12 +61,15 @@ def main():
 
     # each query loads its own data internally
     q1 = Find_Movie_By_Title()
-    q2 = FindByActor(actorTable, id_to_movieData, id_to_rating)
-    q5 = load_movie_database()
-
-    movie_file = "data/prototype_data/movies_metadata_small.csv"
-    movies_array = q1.load_movies_from_csv(movie_file)
+    movies_array = q1.load_movies_from_csv(MOVIE_PATH)
     q1.build_title_hashtable(movies_array)
+    q2 = FindByActor(actorTable, id_to_movieData, id_to_rating)
+    q3 = FindMoviesByGenre()
+    movies_array_q3 = q3.load_movies_from_pickle(MOVIE_PATH)
+    bst_q3 = q3.build_year_bst(movies_array_q3)
+    q4 = Top10_Movies()
+    q4.load_revenue_from_csv(pickle_file_path=MOVIE_PATH, rating_file_path=RATING_PATH)
+    q5 = load_movie_database()
 
     print("Done! Lets Get Started!\n")
 
@@ -82,17 +86,28 @@ def main():
 
         choice = input("\nEnter your choice (1-8): ").strip()
 
-        # Query 1 Placeholder
+        # Query 1
         if choice == "1":
             while True:
-                print("\n--- Query 1: Find Movie by Title ---")
+                print("\nQuery 1: Find Movie by Title")
+
+                # Get user input
                 title = input("Enter movie title: ").strip()
 
+                # Find movie
                 movie = q1.find_movie_by_title(q1.movie_title_table, title)
+
+                # Display information
                 q1.display_movie_info(movie)
 
-                again = input("\nAre you finished with your search? (yes/no): ").strip().lower()
+                # Optional: Add to favorites or watch-later
+                if movie:
+                    add_choice = input("\nWould you like to add this movie to your favorites or watch-later list? (yes/no): ").strip().lower()
+                    if add_choice == "yes":
+                        movie_title = movie.get("title", title)
+                        handle_add_to_list(user_profile, movie_title)
 
+                again = input("\nAre you finished with your search? (yes/no): ").strip().lower()
                 if again == "no":
                     print("\nReturning to main menu...\n")
                     break
@@ -103,7 +118,7 @@ def main():
                     print("\nInvalid input. Returning to main menu.\n")
                     break
 
-        # Query 2: Find all movies by actor (ACTIVE)
+        # Query 2: Find all movies by actor
         elif choice == "2":
             while True:
                 actor = input("\nEnter actor name: ").strip()
@@ -133,41 +148,70 @@ def main():
                     print("\nInvalid input. Returning to main menu.\n")
                     break
 
-        # Query 3 Placeholder
+        # Query 3 
         elif choice == "3":
             while True:
                 print("\n--- Query 3: Find Movies by Genre ---")
-                print("NOT DONE YET!\n")
-                _ = input("Enter genre (example: Comedy, Action, Drama): ").strip()
-                print("\n[Placeholder] Genre search results would appear here.\n")
 
-                again = input("\nAre you finished with your search? (yes/no): ").strip().lower()
+                genre = input("Enter genre (example: Comedy, Action, Drama): ").strip()
+                try:
+                    start_year = int(input("Enter start year: ").strip())
+                    end_year = int(input("Enter end year: ").strip())
+                except ValueError:
+                    print("Invalid year. Please enter valid numbers.")
+                    continue
+
+                # Find movies by genre in range
+                results = q3.find_movies_by_genre_in_two_given_year(bst_q3, genre, start_year, end_year)
+                print(f"\nMovies in genre '{genre}' from {start_year} to {end_year}:\n")
+                q3.display(results)
+
+                # Add to favorites/watch-later
+                if results.size() > 0:
+                    add_choice = input(
+                        "\nWould you like to add one of these movies to your favorites or watch-later list? (yes/no): "
+                    ).strip().lower()
+                    if add_choice == "yes":
+                        movie_title = input("Enter the exact movie title: ").strip()
+                        handle_add_to_list(user_profile, movie_title)
+
+                # Ask to repeat
+                again = input("\nWould you like to search another genre? (yes/no): ").strip().lower()
                 if again == "no":
                     print("\nReturning to main menu...\n")
                     break
-                elif again == "yes":
-                    print("\nExiting program. Goodbye!\n")
-                    return
-                else:
+                elif again != "yes":
                     print("\nInvalid input. Returning to main menu.\n")
                     break
 
-        # Query 4 Placeholder
+        # Query 4
         elif choice == "4":
             while True:
-                print("\n--- Query 4: Find Movies by Year ---")
-                print("NOT DONE YET!\n")
-                _ = input("Enter year (example: 1995): ").strip()
-                print("\n[Placeholder] Year-based search results would appear here.\n")
+                print("\nQuery 4: Top 10 Movies")
+                print("You can choose to rank by 'rating' or 'revenue'.\n")
+                key = input("Enter key (rating/revenue): ").strip().lower()
 
-                again = input("\nAre you finished with your search? (yes/no): ").strip().lower()
+                if key not in ["rating", "revenue"]:
+                    print("\nInvalid choice. Please enter 'rating' or 'revenue'.\n")
+                    continue
+
+                # get top 10 movies for that key
+                top10_array = q4.top_10_by_key(key)
+                q4.display(top10_array, key)
+
+                # optional: allow adding to favorites
+                add_choice = input(
+                    "\nWould you like to add one of these movies to your favorites or watch-later list? (yes/no): "
+                ).strip().lower()
+                if add_choice == "yes":
+                    movie_title = input("Enter the exact movie title: ").strip()
+                    handle_add_to_list(user_profile, movie_title)
+
+                again = input("\nWould you like to view another Top 10 list? (yes/no): ").strip().lower()
                 if again == "no":
                     print("\nReturning to main menu...\n")
                     break
-                elif again == "yes":
-                    print("\nExiting program. Goodbye!\n")
-                    return
-                else:
+                elif again != "yes":
                     print("\nInvalid input. Returning to main menu.\n")
                     break
 
