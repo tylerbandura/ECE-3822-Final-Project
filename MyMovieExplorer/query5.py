@@ -35,7 +35,7 @@ class MovieDatabase:
     def __init__(self):
         # store movies by title for quick lookup, call HashTable
         self.movies_by_title = HashTable(size=100000)
-        # st ore movies by genre for suggesting
+        # store movies by genre for suggesting
         self.movies_by_genre = HashTable(size=100)
 
     # method to add movie to database
@@ -88,7 +88,7 @@ class MovieDatabase:
                 continue
             score = 0
 
-            # genres macthes atomically so add 5
+            # genre match
             score += 5
 
             # rating difference, the closer the better
@@ -128,7 +128,7 @@ def load_movie_database():
         return None
 
 # main fuction to call everything and interact with user to get movie suggestions
-def movei_suggestion():
+def movie_suggestion():
     # load movie database
     db = load_movie_database()
     
@@ -148,6 +148,6 @@ def movei_suggestion():
         
 
 if __name__ == "__main__":
-    movei_suggestion()
+    movie_suggestion()
 
 # end of file
