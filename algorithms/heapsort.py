@@ -1,5 +1,5 @@
 '''
-file: DataStructures/heap.py
+file: algorithms/heapsort.py
 
 ZhaoXiang Lan, 12/4/2025
 
