@@ -70,11 +70,12 @@ if __name__ == "__main__":
     print("Building actor graph...")
     actor_graph = build_actor_graph(ACTORS_CSV, id_to_title)
 
-    # build the path for the pickled graph
-    with open("pickled_graph.pkl", "wb") as f:
+    PICKLE_DIR = os.path.join(PROJECT_ROOT, "pickled_things")
+    os.makedirs(PICKLE_DIR, exist_ok=True)
+
+    with open(os.path.join(PICKLE_DIR, "pickled_graph.pkl"), "wb") as f:
         pickle.dump(actor_graph, f)
 
-    with open("pickled_movies.pkl", "wb") as f:
+    with open(os.path.join(PICKLE_DIR, "pickled_movies.pkl"), "wb") as f:
         pickle.dump(id_to_title, f)
-
     print("built pickled graph and movie title dictionary successfully.")
