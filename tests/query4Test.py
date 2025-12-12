@@ -16,10 +16,10 @@ from MyMovieExplorer.query4 import Top10_Movies
 
 def main():
     finder = Top10_Movies()
-    revenue_csv_file_path = '/home/tuv12540/ece_3822/ECE-3822-Final-Project/data/prototype_data/movies_metadata_small.csv'
-    rating_csv_file_path = '/home/tuv12540/ece_3822/ECE-3822-Final-Project/data/prototype_data/ratings_small.csv'
-    print("Loading movies from CSV file...")
-    finder.load_revenue_from_csv(revenue_csv_file_path, rating_csv_file_path)
+    pickle_file_path = '/home/tuv12540/ece_3822/ECE-3822-Final-Project/data/id_to_movieData.pkl'
+    rating_pickle_file_path = '/home/tuv12540/ece_3822/ECE-3822-Final-Project/data/id_to_rating.pkl'
+    print("Loading movies from pickle file...")
+    finder.load_revenue_from_csv(pickle_file_path, rating_pickle_file_path)
     print(f"Loaded {finder.movies_array.size()} movies.\n")
 
     print("Find the top-10 movies by:")

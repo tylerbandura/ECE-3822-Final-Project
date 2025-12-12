@@ -215,45 +215,53 @@ def main():
 
         # Query 6
         elif choice == "6":
+            import io, sys
+
             while True:
                 print("\nQuery 6: Find Shortest Path Between Two Actors")
 
                 print("Enter two actor names to find their shortest connection (shared movie path):")
-                actor1 = input("Actor 1: ").strip()
-                actor2 = input("Actor 2: ").strip()
+                actor1 = input("Actor 1: ").strip().lower()
+                actor2 = input("Actor 2: ").strip().lower()
+
+                old_argv = sys.argv
+                old_stdout = sys.stdout
+                buffer = io.StringIO()
 
                 # Run the query6 function directly
                 try:
-                    # emulate its main logic cleanly
-                    import io, sys
-                    old_stdout = sys.stdout
-                    sys.stdout = buffer = io.StringIO()
+                    sys.argv = ["query6.py", actor1, actor2]
+                    sys.stdout = buffer
 
-                    # call the function
-                    path_for_2_actors()
+                    # Run your teammate’s code exactly as written
+                    from MyMovieExplorer import query6
+                    query6.path_for_2_actors()
 
-                    sys.stdout = old_stdout
-                    output = buffer.getvalue()
-                    print(output)
                 except SystemExit:
-                    sys.stdout = old_stdout
+                    # Ignore sys.exit() calls from their script
+                    pass
                 except Exception as e:
-                    print(f"Error running Query 6: {e}")
+                    print(f"\nError running Query 6: {e}")
+                finally:
+                    # Restore state
+                    sys.argv = old_argv
+                    sys.stdout = old_stdout
 
-                # Optional: allow user to add one of the movies in the path to their lists
-                add_choice = input("\nWould you like to add one of these connecting movies to your favorites or watch-later list? (yes/no): ").strip().lower()
+                # Print captured output to the CLI
+                output = buffer.getvalue().strip()
+                print("\n" + output + "\n")
+
+                # Optional: add connecting movie to favorites or watch-later
+                add_choice = input("Would you like to add one of these connecting movies to your favorites or watch-later list? (yes/no): ").strip().lower()
                 if add_choice == "yes":
                     movie_title = input("Enter the exact movie title: ").strip()
                     handle_add_to_list(user_profile, movie_title)
 
-                # ask to continue
                 again = input("\nWould you like to find another path? (yes/no): ").strip().lower()
                 if again == "no":
                     print("\nReturning to main menu...\n")
                     break
-                elif again == "yes":
-                    continue
-                else:
+                elif again != "yes":
                     print("\nInvalid input. Returning to main menu.\n")
                     break
 
