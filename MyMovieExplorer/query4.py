@@ -24,11 +24,39 @@ class Top10_Movies:
     # constructor
     def __init__(self):
         self.movies_array = None
+    
+    def load_ratings_from_csv(self, rating_file_path):
+        df = pd.read_csv(rating_file_path)
+        rating_info = {}
+
+        for _, row in df.iterrows():
+            movie_id = row.get('movieId')
+            rating = row.get('rating')
+
+            # count ratings and times rated for each movie
+            if movie_id not in rating_info:
+                rating_info[movie_id] = [rating, 1]
+            else:
+                rating_info[movie_id][0] += rating
+                rating_info[movie_id][1] += 1
         
+        avg_ratings = {}
+        # compute average ratings
+        for movie_id, info in rating_info.items():
+            total_rating = info[0]
+            count = info[1]
+            avg_ratings[movie_id] = total_rating / count
+        
+        return avg_ratings
+
     # function to load movies from csv file
-    def load_movies_from_csv(self, file_path):
+    def load_revenue_from_csv(self, revenue_file_path, rating_file_path=None):
         # read movie data from csv file using pandas
-        df = pd.read_csv(file_path)
+        df = pd.read_csv(revenue_file_path)
+
+        # check if the rating path is provided
+        if rating_file_path is not None:
+            avg_ratings = self.load_ratings_from_csv(rating_file_path)
 
         # convert dataframe to list of dictionaries
         movies = df.to_dict(orient='records')
@@ -38,6 +66,16 @@ class Top10_Movies:
 
         # append each movie to the dynamic array
         for movie in movies:
+            # if rating path is provided, update the movie rating
+            if rating_file_path is not None:
+                # get the movie ID
+                movie_id = movie.get('id')
+                # update the rating if available
+                if movie_id in avg_ratings:
+                    movie['rating'] = avg_ratings[movie_id]
+                else:
+                    movie['rating'] = None
+
             # parse the genres field from string to list of dictionaries
             genres_str = movie.get('genres')
             # check if genres_str is a valid string before parsing
