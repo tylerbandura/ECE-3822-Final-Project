@@ -1,5 +1,5 @@
 '''
-file: MyMovieExplorer/query1.py
+file: algorithms/mergesort.py
 ZhaoXiang Lan, 12/12/2025
 
 description:

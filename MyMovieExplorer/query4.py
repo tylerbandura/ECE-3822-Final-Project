@@ -8,6 +8,7 @@ keep the top 10 movies with rantings or revenue
 # input the root path
 import os
 import sys
+import pickle
 
 # add the project root to sys.path
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -26,75 +27,71 @@ class Top10_Movies:
         self.movies_array = None
     
     def load_ratings_from_csv(self, rating_file_path):
-        df = pd.read_csv(rating_file_path)
-        rating_info = {}
-
-        for _, row in df.iterrows():
-            movie_id = row.get('movieId')
-            rating = row.get('rating')
-
-            # count ratings and times rated for each movie
-            if movie_id not in rating_info:
-                rating_info[movie_id] = [rating, 1]
-            else:
-                rating_info[movie_id][0] += rating
-                rating_info[movie_id][1] += 1
+        # Load pickled rating data (HashTable object)
+        with open(rating_file_path, "rb") as f:
+            id_to_rating = pickle.load(f)
         
-        avg_ratings = {}
-        # compute average ratings
-        for movie_id, info in rating_info.items():
-            total_rating = info[0]
-            count = info[1]
-            avg_ratings[movie_id] = total_rating / count
+        # Convert HashTable to dictionary for easier lookup
+        ratings_dict = {}
         
-        return avg_ratings
+        # Manually iterate through HashTable buckets to get all rating data
+        for bucket in id_to_rating.buckets:
+            current = bucket.head
+            while current:
+                movie_id = current.key
+                rating = current.value
+                ratings_dict[movie_id] = rating
+                current = current.next
+        
+        return ratings_dict
 
-    # function to load movies from csv file
-    def load_revenue_from_csv(self, revenue_file_path, rating_file_path=None):
-        # read movie data from csv file using pandas
-        df = pd.read_csv(revenue_file_path)
-
+    # function to load movies from pickle file
+    def load_revenue_from_csv(self, pickle_file_path, rating_file_path=None):
+        # Load pickled movie data (HashTable object)
+        with open(pickle_file_path, "rb") as f:
+            id_to_movieData = pickle.load(f)
+        
         # check if the rating path is provided
         if rating_file_path is not None:
             avg_ratings = self.load_ratings_from_csv(rating_file_path)
 
-        # convert dataframe to list of dictionaries
-        movies = df.to_dict(orient='records')
-
         # create a dynamic array to hold the movies
         array_of_movies = array()
 
-        # append each movie to the dynamic array
-        for movie in movies:
-            # if rating path is provided, update the movie rating
-            if rating_file_path is not None:
-                # get the movie ID
-                movie_id = movie.get('id')
-                # update the rating if available
-                if movie_id in avg_ratings:
-                    movie['rating'] = avg_ratings[movie_id]
-                else:
-                    movie['rating'] = None
+        # Manually iterate through HashTable buckets to get all movie data
+        for bucket in id_to_movieData.buckets:
+            current = bucket.head
+            while current:
+                movie = current.value
+                
+                # if rating path is provided, update the movie rating
+                if rating_file_path is not None:
+                    # get the movie ID
+                    movie_id = movie.get('id')
+                    # update the rating if available
+                    if movie_id in avg_ratings:
+                        movie['rating'] = avg_ratings[movie_id]
+                    else:
+                        movie['rating'] = None
 
-            # parse the genres field from string to list of dictionaries
-            genres_str = movie.get('genres')
-            # check if genres_str is a valid string before parsing
-            if isinstance(genres_str, str) and genres_str.strip():
-                try:
-                    # use ast.literal_eval to safely parse the string representation of a list
-                    parsed = ast.literal_eval(genres_str)
-                    # convert the parsed list to a dynamic array
-                    genre_array = array()
-                    # append each genre dictionary to the dynamic array
-                    for g in parsed:
-                        genre_array.append(g)
-                    movie["genres"] = genre_array
-                except:
-                    movie["genres"] = array()
-            else:
-                movie["genres"] = array() 
-
-            array_of_movies.append(movie)
+                # Process genres data if it exists
+                if 'genres' in movie:
+                    genres_str = movie['genres']
+                    if isinstance(genres_str, str) and genres_str.strip():
+                        try:
+                            parsed = ast.literal_eval(genres_str)
+                            genre_array = array()
+                            for g in parsed:
+                                genre_array.append(g)
+                            movie['genres'] = genre_array
+                        except:
+                            movie['genres'] = array()
+                    else:
+                        movie['genres'] = array()
+                
+                # Add processed movie data to array
+                array_of_movies.append(movie)
+                current = current.next
         
         # store the movies array
         self.movies_array = array_of_movies

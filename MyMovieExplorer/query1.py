@@ -8,6 +8,7 @@ the program to find a movie by title
 # input the root path
 import os
 import sys
+import pickle
 
 # add the project root to sys.path for running the module
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -28,46 +29,45 @@ class Find_Movie_By_Title:
         self.movie_title_table = None
         self.movies_array = None
     
-    # function to load movies from csv file
+    # function to load movies from pickle file
     def load_movies_from_csv(self, file_path):
-        # read movie data from csv file using pandas
-        df = pd.read_csv(file_path)
-
-        # convert dataframe to list of dictionaries
-        movies = df.to_dict(orient='records')
-
-        # create a dynamic array to hold the movies
-        array_of_movies = array()
-
-        # append each movie to the dynamic array
-        for movie in movies:
-            # parse the genres field from string to list of dictionaries
-            genres_str = movie.get('genres')
-            # check if genres_str is a valid string before parsing
-            if isinstance(genres_str, str) and genres_str.strip():
-                try:
-                    # use ast.literal_eval to safely parse the string representation of a list
-                    parsed = ast.literal_eval(genres_str)
-                    # convert the parsed list to a dynamic array
-                    genre_array = array()
-                    # append each genre dictionary to the dynamic array
-                    for g in parsed:
-                        # append genre dictionary to dynamic array
-                        genre_array.append(g)
-                    # assign the dynamic array to the movie's genres field
-                    movie["genres"] = genre_array
-                except:
-                    movie["genres"] = array()
-            else:
-                movie["genres"] = array() 
-            # append the movie to the dynamic array
-            array_of_movies.append(movie)
+        # Load pickled movie data (HashTable object)
+        with open(file_path, "rb") as f:
+            id_to_movieData = pickle.load(f)
         
-        # set the movies_array attribute
-        self.movies_array = array_of_movies
-
-        # return the movies array
-        return array_of_movies
+        # Convert HashTable to array
+        movies_array = array()
+        
+        # Manually iterate through HashTable buckets to get all movie data
+        for bucket in id_to_movieData.buckets:
+            current = bucket.head
+            while current:
+                movie_data = current.value
+                
+                # Process genres data if it exists
+                if 'genres' in movie_data:
+                    genres_str = movie_data['genres']
+                    if isinstance(genres_str, str) and genres_str.strip():
+                        try:
+                            parsed = ast.literal_eval(genres_str)
+                            genre_array = array()
+                            for g in parsed:
+                                genre_array.append(g)
+                            movie_data['genres'] = genre_array
+                        except:
+                            movie_data['genres'] = array()
+                    else:
+                        movie_data['genres'] = array()
+                
+                # Add processed movie data to array
+                movies_array.append(movie_data)
+                current = current.next
+        
+        # Store the array for later use
+        self.movies_array = movies_array
+        
+        print(f"Loaded {movies_array.size()} movies.")
+        return movies_array
     
     # build the hashtable indexed by movie titles
     def build_title_hashtable(self, movies_array):
@@ -185,8 +185,12 @@ class Find_Movie_By_Title:
                     
         # genre_names contains all the genre names
         # print them as a comma-separated string
-        if len(genre_names) > 0:
-            genres_text = ", ".join(genre_names)
+        if genre_names.size() > 0:
+            # Manually build the genres string using custom array
+            genres_list = []
+            for i in range(genre_names.size()):
+                genres_list.append(genre_names.get(i))
+            genres_text = ", ".join(genres_list)
             print("Genres: " + genres_text)
         
         # Budget
