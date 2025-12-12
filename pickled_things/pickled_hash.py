@@ -26,6 +26,24 @@ from MyMovieExplorer.query5 import Movie, MovieDatabase
 PICKLE_DIR = os.path.join(PROJECT_ROOT, "pickled_things")
 os.makedirs(PICKLE_DIR, exist_ok=True)
 
+
+def parse_genres(genres_raw):
+    """
+    Convert genre string from CSV into a list of genre names.
+    Example input:
+    "[{'id': 16, 'name': 'Animation'}, {'id': 35, 'name': 'Comedy'}]"
+    returns: ["Animation", "Comedy"]
+    """
+    if genres_raw == "unknown" or genres_raw.strip() == "":
+        return []
+
+    try:
+        parsed = ast.literal_eval(genres_raw)  # convert string → python list
+        names = [g["name"] for g in parsed if "name" in g]
+        return names
+    except:
+        return []
+
 # main function to build and pickle movie database
 def main():
     # create database
