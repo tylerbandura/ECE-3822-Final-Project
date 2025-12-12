@@ -1,7 +1,9 @@
 """
 query2.py
 
-Purpose: Find all movies by a given actor
+Purpose: Find all movies by a given actor, movie info will also be displayed
+
+key feature: Each movie will be sorted by rating
 
 This file will build two hashtables:
 1. actor: actor_name(lower) -> [movie_id...]
@@ -12,84 +14,109 @@ To keep our load factor less than 0.75 (aiming for a = 0.65)
     id_to_title: buckets = 45000/0.65 = 69000 (bucketsize = 70000)
 
 """
-import pandas as pd
-from DataStructures.hashTable import HashTable
 from DataStructures.array import array
 
 class FindByActor:
-    def __init__(self):
-        # hashtable for actor
-        self.actorTable = HashTable(size=100000)
-        # hashtable for id
-        self.id_to_title = HashTable(size=70000)
+    def __init__(self, actorTable, id_to_movieData, id_to_rating):
+        # getting prebuilt hash tables from main.py
+        self.actorTable = actorTable
+        self.id_to_movieData = id_to_movieData
+        self.id_to_rating = id_to_rating
 
-        self.load_movies()
-        self.load_actors()
-
-    def load_movies(self, file_path="data/prototype_data/movies_metadata_small.csv"):
-        # loads movies IDs and titles from database into id_to_title hashtable, returns # of movies loaded
-
-        try:
-            df = pd.read_csv(file_path)
-            rows = df.values.tolist()
-            header = list(df.columns)
-
-            id_index = header.index("id")
-            title_index = header.index("title")
-
-            for i, row in enumerate(rows):
-                movie_id = str(row[id_index]).strip()
-                title = str(row[title_index]).strip() if row[title_index] else "(Unknown Title)"
-                if movie_id != "":
-                    self.id_to_title.insert(movie_id, title)
-
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Error: {file_path} not found.")
-        except KeyError:
-            raise KeyError("Error: CSV missing 'id' or 'title' colums.")
-
-    def load_actors(self, file_path="data/prototype_data/cleaned_actors_small.csv"):
-        # loads actor and movie ids relationships, returns number of actors processed
-
-        try:
-            df = pd.read_csv(file_path)
-            rows = df.values.tolist()
-            header = list(df.columns)
-
-            actor_index = header.index("actor_name")
-            movie_index = header.index("movie_id")
-
-            for i, row in enumerate(rows):
-                actor = str(row[actor_index]).strip().lower() # make lowercase for consistent lookups
-                movie_id = str(row[movie_index]).strip()
-
-                #skip invalid rows
-                if actor == "" or movie_id == "":
-                    continue
-
-                title = self.id_to_title.lookup(movie_id)
-                if title is None:
-                     title = "(Unknown Title)"
-
-                    # Insert or update list of titles
-                movie_array = self.actorTable.lookup(actor)
-                if movie_array is None:
-                    movie_array = array()
-                    movie_array.append(title)
-                    self.actorTable.insert(actor, movie_array)
-                else:
-                    movie_array.append(title)
-                    self.actorTable.insert(actor, movie_array)
-
-        except FileNotFoundError:
-            raise FileNotFoundError(f"Error: {file_path} not found.")
-        except KeyError:
-            raise KeyError("Error: CSV missing 'actor_name' or 'movie_id' columns.")
-
+    # find all movies from an actors name
     def find_movies(self, actor_name):
-        # returns the list of movie titles for a given actor, returns None if not found
-
         if not actor_name:
             return None
-        actor_key = actor_name.strip().lower() # make lowercase for consistency
-        return self.actorTable.lookup(actor_key)
+        
+        actor_key = actor_name.strip().lower() # make lowercase for case sensitivity
+        movies_entries = self.actorTable.lookup(actor_key)
+        if not movies_entries:
+            return None
+        
+        results = []
+
+        for entry in movies_entries:
+            movie_id = entry.get("movie_id")
+            movie_data = self.id_to_movieData.lookup(movie_id)
+            rating = self.id_to_rating.lookup(movie_id)
+
+            if movie_data is None:
+                continue
+
+            movie_info = {}
+            for key in movie_data:
+                movie_info[key] = movie_data[key]
+
+            movie_info["rating"] = rating if rating is not None else 0.0
+            results.append(movie_info)
+
+        # sort by rating (highest first)
+        results.sort(key=lambda m: m["rating"], reverse=True)
+        return results
+    
+    def display_movie_info(self, movie):
+        if not movie:
+            print("\nMovie not found.")
+            return
+        
+        #title
+        title = movie.get("title") or movie.get("original_title") or "Unknown Title"
+        print(f"Title: {title}")
+
+        # release year
+        # --- Release Year ---
+        release_date = movie.get("release_date", "")
+        year = release_date[:4] if len(release_date) >= 4 else "Unknown"
+
+        # --- Runtime ---
+        runtime = movie.get("runtime")
+        if runtime:
+            try:
+                runtime = int(float(runtime))
+                hours = runtime // 60
+                minutes = runtime % 60
+                runtime_str = f"{hours}h {minutes}m"
+            except:
+                runtime_str = "Unknown"
+        else:
+            runtime_str = "Unknown"
+
+        # --- Language ---
+        lang = movie.get("original_language", "Unknown")
+        if isinstance(lang, str):
+            lang = lang.upper()
+
+        print(f"{year} | {runtime_str} | {lang}")
+
+        # --- Genres ---
+        genres = movie.get("genres")
+        if genres and isinstance(genres, str):
+            print(f"Genres: {genres}")
+
+        # --- Budget ---
+        budget = movie.get("budget")
+        if budget:
+            try:
+                budget = int(float(budget))
+                print(f"Budget: ${budget:,}")
+            except:
+                print(f"Budget: {budget}")
+
+        # --- Revenue ---
+        revenue = movie.get("revenue")
+        if revenue:
+            try:
+                revenue = int(float(revenue))
+                print(f"Revenue: ${revenue:,}")
+            except:
+                print(f"Revenue: {revenue}")
+
+        # --- Rating ---
+        rating = movie.get("rating", None)
+        if rating is not None:
+            print(f"Rating: {rating:.2f} / 10 stars")
+
+        # --- Overview ---
+        overview = movie.get("overview")
+        if overview and str(overview).lower() != "nan":
+            print("Synopsis:", overview)
