@@ -9,6 +9,9 @@ import sys
 from MyMovieExplorer.query1 import Find_Movie_By_Title
 from MyMovieExplorer.query2 import FindByActor
 from MyMovieExplorer.query4 import Top10_Movies
+from MyMovieExplorer.fav_list import UserProfile
+
+user_profile = UserProfile()
 
 def main():
     print("Initializing Movie Data Explorer... Please wait.\n")
@@ -47,9 +50,10 @@ def main():
         print("3. Finds all movies between two years by given genre")
         print("4. Top 10 movies (ratings or revenue)")
         print("5. Get suggested Movie")
-        print("7. Quit Explorer")
+        print("7. Manage favorites / Watch-Later Lists")
+        print("8. Quit Explorer")
 
-        choice = input("\nEnter your choice (1-7): ").strip()
+        choice = input("\nEnter your choice (1-8): ").strip()
 
         # Query 1 Placeholder
         if choice == "1":
@@ -82,6 +86,26 @@ def main():
                     print(f"\nMovies featuring {actor} (sorted by rating):")
                     for movie in result_array:
                         q2.display_movie_info(movie)
+
+                add_choice = input("\nWould you like to add one of these movies to your favorites or watch-later list? (yes/no): ").strip().lower()
+                if add_choice == "yes":
+                    movie_title = input("Enter the exact movie title: ").strip()
+                    list_choice = input("Add to (fav/watch)? ").strip().lower()
+
+                    if list_choice == "fav":
+                        if user_profile.add_favorite(movie_title):
+                            print(f"Added '{movie_title}' to Favorites.\n")
+                        else:
+                            print("That movie is already in Favorites.\n")
+
+                    elif list_choice == "watch":
+                        if user_profile.add_watch_later(movie_title):
+                            print(f"Added '{movie_title}' to Watch-Later list.\n")
+                        else:
+                            print("That movie is already in Watch-Later.\n")
+
+                    else:
+                        print("Invalid choice. Please type 'fav' or 'watch'.\n")
                 else:
                     print(f"\nNo movies found for {actor}.")
 
@@ -172,13 +196,33 @@ def main():
                     print("\nInvalid input. Returning to main menu.\n")
                     break
 
-        # Quit
         elif choice == "7":
+            print("\nManage Favorites & Watch-Later Lists")
+            print("Available commands:")
+            print("  add fav <title>")
+            print("  add watch <title>")
+            print("  remove fav <title>")
+            print("  remove watch <title>")
+            print("  show favs")
+            print("  show watchlist")
+            print("  clear favs")
+            print("  clear watchlist")
+            print("  quit  (to exit back to main menu)\n")
+
+            running = True
+            while running:
+                command = input("Enter command: ").strip().lower()
+                running = user_profile.handle_command(command)
+
+            print("\nReturning to main menu...\n")
+                  
+        # Quit
+        elif choice == "8":
             print("\nGoodbye!\n")
             break
 
         else:
-            print("\nInvalid choice. Please enter 1–7.\n")
+            print("\nInvalid choice. Please enter 1–8.\n")
 
 
 # Run CLI
