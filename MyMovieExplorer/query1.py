@@ -163,7 +163,7 @@ class Find_Movie_By_Title:
         genres_array = movie.get("genres")
 
         # A list to store the names of genres
-        genre_names = []
+        genre_names = array()
 
         # First: make sure genres_array is your custom array type
         if genres_array:
