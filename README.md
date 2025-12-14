@@ -1,6 +1,6 @@
 # Welcome to Team GLP's Movie Data Explorer!
 The Movie Data Explorer is a program that serves to enhance the way a movie buff can access all the information they want
-regarding various movies. Movies are stored in a large database that consists of over 45,000 films, and the
+regarding various movies. Movies are stored in a large database that consists of over 45,000 films located in the `data` folder, and each film has data associated with it, such as genre, revenue, rating (out of 10), year released, a synopsis, and runtime.  The
 Movie Explorer uses efficient data structures and algorithms to easily sort through it and give the user
 exactly what they're searching for.
 
