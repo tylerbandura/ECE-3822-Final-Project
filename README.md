@@ -47,11 +47,12 @@ Type "yes" if you want to add to your list, then type the title of the movie you
 You will then be asked if you are finished with your search. Type 'yes' to exit the program, or type 'no' to return to the menu and select another action.
 
 ## Example 2: Find all movies in a given genre between 2 years
-If you want to use the Movie Explorer to find movies of a certain genre, follow these instructions:
+If you want to use the Movie Explorer to find movies of a certain genre released between 2 years, follow these instructions:
 * Type '3'
-* Type the genre you would like to search for (Example, Action)
-* Select your start year (Example, 2009)
-* Select your end year (Example, 2011)
+* Type the genre you would like to search for (Example: Action)
+* Input your start year (Example: 2009)
+* Input your end year (Example: 2011)
+
 The resulting output will be the list of action films released between 2009 and 2011.
 Just as in the previous example, you can add one of these films to your lists.
 
