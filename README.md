@@ -17,7 +17,7 @@ All code is done using Python.
 * Allows to save movies to a favorites list as well as a Watch Later list, and to view and clear it.
 
 # How to use:
-To use the program, clone the repo into VS code by typing ` git clone https://github.com/tylerbandura/ECE-3822-Final-Project` into your VS code terminal, then run the `main.py` file located in the CLI folder. It may take a bit to initialize.
+To use the program, clone the repo into VS code by typing ` git clone https://github.com/tylerbandura/ECE-3822-Final-Project` into your VS code terminal, then run the `main.py` file located in the CLI folder. This is done by typing `python -m cli.main` in the terminal. It may take a bit to initialize.
 
 After initialization is complete, you will be brought to the menu, with a list of queries/actions you can run.
 Each query/action is represented by a number:
@@ -33,6 +33,7 @@ Welcome to GLP's Movie Data Explorer, please choose from the menu below :)
 8. Quit Explorer
 Enter your choice(1-8)
 ```
+
 ## Example 1: Find movies by actor
 Let's say, for example, you want to find all movies an actor was in. To do this, type "2".
 You will be asked to input an actor. As an example, let's do Tom Hanks. Type "Tom Hanks" when prompted.
