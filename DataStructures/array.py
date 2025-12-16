@@ -98,7 +98,6 @@ class array:
         # expand the array if index exceeds current size
         while index >= self._size:
             self.append(None)
-            self._size += 1
         # set the element at the specified index
         self._array[index] = value
 
