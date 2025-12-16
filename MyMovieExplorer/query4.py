@@ -20,6 +20,7 @@ import pandas as pd
 import ast
 from algorithms.heapsort import MinHeap
 from DataStructures.array import array
+from DataStructures.hashTable import HashTable
 
 class Top10_Movies:
     # constructor
@@ -32,15 +33,15 @@ class Top10_Movies:
             id_to_rating = pickle.load(f)
         
         # Convert HashTable to dictionary for easier lookup
-        ratings_dict = {}
+        ratings_dict = HashTable()
         
         # Manually iterate through HashTable buckets to get all rating data
         for bucket in id_to_rating.buckets:
             current = bucket.head
             while current:
-                movie_id = current.key
+                movie_id = str(current.key)
                 rating = current.value
-                ratings_dict[movie_id] = rating
+                ratings_dict.insert(movie_id, rating)
                 current = current.next
         
         return ratings_dict
@@ -69,12 +70,9 @@ class Top10_Movies:
                     # get the movie ID
                     movie_id = str(current.key)
                     # update the rating if available
-                    if movie_id in avg_ratings:
-                        movie['rating'] = avg_ratings[movie_id]
-                    elif movie_id.isdigit() and int(movie_id) in avg_ratings:
-                        movie['rating'] = avg_ratings[int(movie_id)]
-                    else:
-                        movie['rating'] = None
+                    r= avg_ratings.lookup(movie_id)
+                    # set the rating
+                    movie['rating'] = r
 
                 # Process genres data if it exists
                 if 'genres' in movie:
