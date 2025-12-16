@@ -187,10 +187,13 @@ class Find_Movie_By_Title:
         # print them as a comma-separated string
         if genre_names.size() > 0:
             # Manually build the genres string using custom array
-            genres_list = []
-            for i in range(genre_names.size()):
-                genres_list.append(genre_names.get(i))
-            genres_text = ", ".join(genres_list)
+            genres_text = ""
+            i=0
+            while i < genre_names.size():
+                if i > 0:
+                    genres_text += ", "
+                genres_text += genre_names.get(i)
+                i += 1
             print("Genres: " + genres_text)
         
         # Budget

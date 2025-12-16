@@ -19,6 +19,7 @@ All code is done using Python.
 # How to use:
 To use the program, clone the repo into VS code by typing ` git clone https://github.com/tylerbandura/ECE-3822-Final-Project` into your VS code terminal, then run the `main.py` file located in the CLI folder. This is done by typing `python -m cli.main` in the terminal. It may take a bit to initialize.
 
+
 After initialization is complete, you will be brought to the menu, with a list of queries/actions you can run.
 Each query/action is represented by a number:
 ```
